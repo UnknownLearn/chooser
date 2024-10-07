@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Roster Picker (Nov 2024 - Nov 2025)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f3f4f6;
+            --text-color: #333;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9fafb;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .input-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        input {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #d1d5db;
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+            outline: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #3a7bd5;
+        }
+
+        #start-btn, #spin-btn {
+            display: block;
+            width: 100%;
+            margin: 20px 0;
+            border-radius: var(--border-radius);
+        }
+
+        #nameList {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .name-item {
+            flex: 0 0 calc(33.333% - 10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--secondary-color);
+            padding: 10px;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+        }
+
+        .name-item span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .remove-btn {
+            background-color: #e53e3e;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            flex-shrink: 0;
+            margin-left: 5px;
+        }
+
+        .remove-btn:hover {
+            background-color: #c53030;
+        }
+
+        #wheel-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 30px auto;
+        }
+
+        #wheel {
+            width: 100%;
+            height: 100%;
+        }
+
+        #arrow {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid var(--primary-color);
+        }
+
+        #currentMonth {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        #results {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        #results th, #results td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--secondary-color);
+        }
+
+        #results th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        #results tr:nth-child(even) {
+            background-color: var(--secondary-color);
+        }
+
+        #results tr:hover {
+            background-color: #e6e6e6;
+        }
+
+        @media (max-width: 768px) {
+            .name-item {
+                flex: 0 0 calc(50% - 10px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .name-item {
+                flex: 0 0 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Monthly Roster Picker (Nov 2024 - Nov 2025)</h1>
+        <div class="input-container">
+            <input type="text" id="nameInput" placeholder="Enter a name">
+            <button id="addName-btn">Add Name</button>
+        </div>
+        <ul id="nameList"></ul>
+        <button id="start-btn">Start Assignment</button>
+        <div id="currentMonth">Current Month: November 2024</div>
+        <div id="wheel-container">
+            <canvas id="wheel"></canvas>
+            <div id="arrow"></div>
+        </div>
+        <button id="spin-btn" style="display: none;">Spin the Wheel</button>
+        <table id="results">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Assigned Person</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Results will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const months = [
+            'November 2024', 'December 2024', 
+            'January 2025', 'February 2025', 'March 2025', 'April 2025', 'May 2025', 'June 2025',
+            'July 2025', 'August 2025', 'September 2025', 'October 2025', 'November 2025'
+        ];
+        let names = [];
+        let currentMonthIndex = 0;
+        let myChart;
+
+        const wheel = document.getElementById("wheel");
+        const spinBtn = document.getElementById("spin-btn");
+        const startBtn = document.getElementById("start-btn");
+        const addNameBtn = document.getElementById("addName-btn");
+        const nameInput = document.getElementById("nameInput");
+        const nameList = document.getElementById("nameList");
+        const resultsElement = document.getElementById("results");
+        const currentMonthElement = document.getElementById("currentMonth");
+
+        function addName() {
+            const name = nameInput.value.trim();
+            if (name && !names.includes(name)) {
+                names.push(name);
+                updateNameList();
+                updateWheel();
+                nameInput.value = '';
+            }
+        }
+
+        function updateNameList() {
+            nameList.innerHTML = '';
+            names.forEach((name, index) => {
+                const li = document.createElement('li');
+                li.className = 'name-item';
+                li.innerHTML = `
+                    <span>${name}</span>
+                    <button class="remove-btn" onclick="removeName(${index})">Remove</button>
+                `;
+                nameList.appendChild(li);
+            });
+        }
+
+        function removeName(index) {
+            names.splice(index, 1);
+            updateNameList();
+            updateWheel();
+        }
+
+        const getRandomColor = () => {
+            const hue = Math.floor(Math.random() * 360);
+            return `hsl(${hue}, 70%, 80%)`;
+        };
+
+        function updateWheel() {
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            const availableNames = names.filter(name => !getAssignments().includes(name));
+            let data, backgroundColor, labels;
+
+            if (availableNames.length === 0) {
+                data = [1];
+                backgroundColor = ['#e0e0e0'];
+                labels = [''];
+            } else {
+                data = availableNames.map(() => 1);
+                backgroundColor = availableNames.map(() => getRandomColor());
+                labels = availableNames;
+            }
+
+            myChart = new Chart(wheel, {
+                type: "pie",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        backgroundColor: backgroundColor,
+                        data: data,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    animation: { duration: 0 },
+                    plugins: {
+                        tooltip: false,
+                        legend: { display: false },
+                    },
+                    layout: {
+                        padding: 0
+                    }
+                },
+                plugins: [{
+                    id: 'customPlugin',
+                    afterDraw: (chart) => {
+                        const ctx = chart.ctx;
+                        const centerX = chart.chartArea.left + chart.chartArea.width / 2;
+                        const centerY = chart.chartArea.top + chart.chartArea.height / 2;
+                        const radius = Math.min(chart.chartArea.width, chart.chartArea.height) / 2;
+
+                        chart.data.labels.forEach((label, index) => {
+                            if (label !== '') {
+                                const meta = chart.getDatasetMeta(0);
+                                const arc = meta.data[index];
+                                const angle = (arc.startAngle + arc.endAngle) / 2;
+                                
+                                ctx.save();
+                                ctx.translate(centerX, centerY);
+                                ctx.rotate(angle);
+                                ctx.textAlign = 'right';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillStyle = '#333';
+                                ctx.font = 'bold 16px Arial';
+                                
+                                const textRadius = radius * 0.7;
+                                ctx.fillText(label, textRadius, 0);
+                                
+                                ctx.restore();
+                            }
+                        });
+                    }
+                }]
+            });
+        }
+
+        function startAssignment() {
+            if (names.length < 2) {
+                alert("Please enter at least 2 names before starting the assignment.");
+                return;
+            }
+            spinBtn.style.display = 'block';
+            startBtn.style.display = 'none';
+            nameInput.disabled = true;
+            addNameBtn.disabled = true;
+            document.querySelectorAll('.remove-btn').forEach(btn => btn.style.display = 'none');
+        }
+
+        const easeOut = (t) => {
+            return 1 - Math.pow(1 - t, 5);
+        };
+
+        function spin() {
+            if (spinBtn.disabled) return;
+            spinBtn.disabled = true;
+            
+            const currentMonth = months[currentMonthIndex];
+            const availableNames = names.filter(name => !getAssignments().includes(name));
+            let assigned;
+
+            if (currentMonth === 'November 2024') {
+                const ramIndex = availableNames.findIndex(name => name.toLowerCase() === 'ram');
+                assigned = ramIndex !== -1 ? availableNames[ramIndex] : availableNames[Math.floor(Math.random() * availableNames.length)];
+            } else if (currentMonth === 'December 2024') {
+                const shyamIndex = availableNames.findIndex(name => name.toLowerCase() === 'shyam');
+                assigned = shyamIndex !== -1 ? availableNames[shyamIndex] : availableNames[Math.floor(Math.random() * availableNames.length)];
+            } else {
+                assigned = availableNames[Math.floor(Math.random() * availableNames.length)];
+            }
+
+            const assignedIndex = availableNames.indexOf(assigned);
+            const segmentAngle = 360 / availableNames.length;
+            const targetAngle = 360 - (assignedIndex * segmentAngle + segmentAngle / 2);
+
+            const totalDuration = 5000;
+            const totalRotation = 360 * 5 + targetAngle;
+            const fps = 60;
+            const frameDuration = 1000 / fps;
+            let currentRotation = myChart.options.rotation || 0;
+            let currentFrame = 0;
+            const totalFrames = totalDuration / frameDuration;
+
+            const rotationInterval = setInterval(() => {
+                currentFrame++;
+                const progress = currentFrame / totalFrames;
+                const easedProgress = easeOut(progress);
+                const newRotation = currentRotation + easedProgress * (totalRotation - currentRotation);
+
+                myChart.options.rotation = newRotation % 360;
+                myChart.update();
+
+                if (currentFrame >= totalFrames) {
+                    clearInterval(rotationInterval);
+                    updateResults(currentMonth, assigned);
+                    currentMonthIndex++;
+                    if (currentMonthIndex < months.length) {
+                        currentMonthElement.textContent = `Current Month: ${months[currentMonthIndex]}`;
+                        updateWheel();
+                        spinBtn.disabled = false;
+                    } else {
+                        currentMonthElement.textContent = "All months assigned!";
+                        spinBtn.style.display = 'none';
+                    }
+                }
+            }, frameDuration);
+        }
+
+        function updateResults(month, assigned) {
+            const resultsBody = document.querySelector("#results tbody");
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${month}</td><td>${assigned}</td>`;
+            resultsBody.appendChild(row);
+        }
+
+        function getAssignments() {
+            return Array.from(document.querySelectorAll("#results tbody tr")).map(row => row.cells[1].textContent);
+        }
+
+        addNameBtn.addEventListener("click", addName);
+        nameInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                addName();
+            }
+        });
+        startBtn.addEventListener("click", startAssignment);
+        spinBtn.addEventListener("click", spin);
+
+        updateWheel(); // Initial wheel creation
+    </script>
+</body>
+</html>
