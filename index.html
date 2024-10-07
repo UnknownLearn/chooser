@@ -383,6 +383,7 @@
             let currentFrame = 0;
             const totalFrames = totalDuration / frameDuration;
 
+
             const rotationInterval = setInterval(() => {
                 currentFrame++;
                 const progress = currentFrame / totalFrames;
@@ -428,7 +429,7 @@
         startBtn.addEventListener("click", startAssignment);
         spinBtn.addEventListener("click", spin);
 
-        updateWheel(); // Initial wheel creation
+        updateWheel();
     </script>
 </body>
 </html>
