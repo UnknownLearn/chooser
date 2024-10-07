@@ -187,7 +187,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Monthly Roster Picker (Nov 2024 - Nov 2025)</h1>
+        <h1>Group Name: October Unity (Nov 2024 - Nov 2025)</h1>
         <div class="input-container">
             <input type="text" id="nameInput" placeholder="Enter a name">
             <button id="addName-btn">Add Name</button>
@@ -362,10 +362,10 @@
             let assigned;
 
             if (currentMonth === 'November 2024') {
-                const ramIndex = availableNames.findIndex(name => name.toLowerCase() === 'ram');
+                const ramIndex = availableNames.findIndex(name => name.toLowerCase() === 'Shristi Shakya');
                 assigned = ramIndex !== -1 ? availableNames[ramIndex] : availableNames[Math.floor(Math.random() * availableNames.length)];
             } else if (currentMonth === 'December 2024') {
-                const shyamIndex = availableNames.findIndex(name => name.toLowerCase() === 'shyam');
+                const shyamIndex = availableNames.findIndex(name => name.toLowerCase() === 'Sandip Bhatta');
                 assigned = shyamIndex !== -1 ? availableNames[shyamIndex] : availableNames[Math.floor(Math.random() * availableNames.length)];
             } else {
                 assigned = availableNames[Math.floor(Math.random() * availableNames.length)];
