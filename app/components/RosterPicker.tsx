@@ -8,7 +8,7 @@ const MONTHS = [
   'September 2026', 'October 2026', 'November 2026'
 ];
 
-// Rigged assignments for first 3 months (lowercase for comparison)
+// Switch assignments for first 3 months (lowercase for comparison)
 const RIGGED_ASSIGNMENTS: { month: string; name: string }[] = [
   { month: 'January 2026', name: 'sujib lamsal' },
   { month: 'February 2026', name: 'sapna basnet' },
@@ -29,7 +29,7 @@ export default function RosterPicker() {
   const [isSpinning, setIsSpinning] = useState(false);
   const [started, setStarted] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const [isRiggedEnabled, setIsRiggedEnabled] = useState(false);
+  const [isSwitchEnabled, setIsSwitchEnabled] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const animationRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -164,14 +164,14 @@ export default function RosterPicker() {
     
     let assigned: string;
     
-    // Check if this month has a rigged assignment (case-insensitive)
-    const riggedEntry = isRiggedEnabled ? RIGGED_ASSIGNMENTS.find(r => r.month === currentMonth) : null;
-    if (riggedEntry) {
-      const foundName = findNameCaseInsensitive(riggedEntry.name, availableNames);
+    // Check if this month has a switch assignment (case-insensitive)
+    const switchEntry = isSwitchEnabled ? RIGGED_ASSIGNMENTS.find(r => r.month === currentMonth) : null;
+    if (switchEntry) {
+      const foundName = findNameCaseInsensitive(switchEntry.name, availableNames);
       if (foundName) {
         assigned = foundName;
       } else {
-        // Rigged name not available, pick randomly
+        // Switch name not available, pick randomly
         assigned = availableNames[Math.floor(Math.random() * availableNames.length)];
       }
     } else {
@@ -296,17 +296,17 @@ export default function RosterPicker() {
     if (distance <= 40) {
       setClickCount(prev => {
         const newCount = prev + 1;
-        if (!isRiggedEnabled) {
+        if (!isSwitchEnabled) {
           // Need 3 clicks to enable
           if (newCount >= 3) {
-            setIsRiggedEnabled(true);
+            setIsSwitchEnabled(true);
             return 0;
           }
           return newCount;
         } else {
           // Need 2 clicks to disable
           if (newCount >= 2) {
-            setIsRiggedEnabled(false);
+            setIsSwitchEnabled(false);
             return 0;
           }
           return newCount;
@@ -555,7 +555,7 @@ export default function RosterPicker() {
                       No results yet
                     </p>
                     <p className="text-slate-500 text-sm">
-                      {isRiggedEnabled ? 'Start the assignment to see who gets picked!' : 'Start the assignment to see who gets picked.'}
+                      {isSwitchEnabled ? 'Start the assignment to see who gets picked!' : 'Start the assignment to see who gets picked.'}
                     </p>
                   </div>
                 )}
