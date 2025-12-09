@@ -10,8 +10,8 @@ const MONTHS = [
 
 // Switch assignments for first 3 months (lowercase for comparison)
 const RIGGED_ASSIGNMENTS: { month: string; name: string }[] = [
-  { month: 'January 2026', name: 'sujib lamsal' },
-  { month: 'February 2026', name: 'sapna basnet' },
+  { month: 'January 2026', name: 'sapna basnet' },
+  { month: 'February 2026', name: 'sujib lamsal' },
   { month: 'March 2026', name: 'bibhusan kc' },
 ];
 
